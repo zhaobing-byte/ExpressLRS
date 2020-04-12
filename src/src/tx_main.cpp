@@ -24,6 +24,12 @@ R9DAC R9DAC;
 hwTimer hwTimer;
 #endif
 
+#if defined(BLE_HID) && defined(PLATFORM_ESP32)
+#include "BleGamepad.h"
+#include "ESP32_BLE_HID.h"
+BleGamepad bleGamepad;
+#endif
+
 //// CONSTANTS ////
 #define RX_CONNECTION_LOST_TIMEOUT 1500 // After 1500ms of no TLM response consider that slave has lost connection
 #define PACKET_RATE_INTERVAL 500
@@ -453,7 +459,7 @@ void setup()
   crsf.connected = &Radio.StartTimerTask;
   crsf.disconnected = &Radio.StopTimerTask;
   crsf.RecvParameterUpdate = &ParamUpdateReq;
-  Radio.TimerDoneCallback = &TimerExpired;
+  //Radio.TimerDoneCallback = &TimerExpired;
 #endif
 
 #ifdef TARGET_R9M_TX
@@ -499,6 +505,11 @@ void setup()
 #endif
 
   Serial.println("ExpressLRS TX Module Booted...");
+
+#ifdef BLE_HID
+  bleGamepad.begin();
+  //delay(5000);
+#endif
 
 #ifdef PLATFORM_ESP32
   //WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
@@ -563,6 +574,10 @@ void setup()
   crsf.RCdataCallback1 = &CheckChannels5to8Change;
 #endif
 
+#if defined(PlATFORM_ESP32) && defined(BLE_HID)
+  //crsf.RCdataCallback2 = &updateBLEHID;
+#endif
+
   POWERMGNT.defaultPower();
   Radio.SetFrequency(GetInitialFreq()); //set frequency first or an error will occur!!!
   Radio.Begin();
@@ -612,6 +627,8 @@ void loop()
   crsf.UARTwdt();
   button.handle();
 #endif
+
+  updateBLEHID();
 }
 
 void ICACHE_RAM_ATTR TimerExpired()

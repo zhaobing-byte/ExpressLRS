@@ -20,3 +20,6 @@
 ### Set your UID here. Must be 6 bytes!
 
 -DMY_UID=0xBA,0xBE,0xCA,0xFE,0xAC,0xDC
+
+### Enable Bluetooth Joystick/Gamepad Support for ESP32 ###
+-DBLE_HID

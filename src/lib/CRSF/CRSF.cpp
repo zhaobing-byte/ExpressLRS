@@ -410,6 +410,7 @@ void ICACHE_RAM_ATTR CRSF::sendSyncPacketToTX(void *pvParameters) // in values i
                     //gpio_set_drive_capability((gpio_num_t)CSFR_TXpin_Module, GPIO_DRIVE_CAP_0);
                     const TickType_t xDelay1 = 1 / portTICK_PERIOD_MS;
                     Serial.println("ESP32 CRSF UART LISTEN TASK STARTED");
+                    UARTwdtLastChecked = millis() + UARTwdtInterval;
                     CRSF::duplex_set_RX();
                     FlushSerial();
 
