@@ -592,7 +592,7 @@ void setup()
 #endif
 
 #if defined(PlATFORM_ESP32) && defined(BLE_HID)
-  //crsf.RCdataCallback2 = &updateBLEHID;
+  crsf.RCdataCallback2 = &updateBLEHID;
 #endif
 
   POWERMGNT.defaultPower();
@@ -600,7 +600,7 @@ void setup()
   Radio.Begin();
   crsf.Begin();
 
-  SetRFLinkRate(RATE_200HZ);
+  SetRFLinkRate(RATE_50HZ);
 }
 
 void loop()

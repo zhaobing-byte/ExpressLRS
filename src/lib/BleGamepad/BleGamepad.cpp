@@ -84,7 +84,7 @@ BleGamepad::BleGamepad(std::string deviceName, std::string deviceManufacturer, u
 
 void BleGamepad::begin(void)
 {
-  xTaskCreate(this->taskServer, "server", 20000, (void *)this, 5, NULL);
+  xTaskCreatePinnedToCore(this->taskServer, "server", 20000, (void *)this, 10, NULL, 1);
 }
 
 void BleGamepad::end(void)

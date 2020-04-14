@@ -13,7 +13,7 @@
 
 uint32_t volatile SX127xDriver::PacketCount = 0;
 
-void inline SX127xDriver::nullCallback(void){};
+void ICACHE_RAM_ATTR nullCallback(void){};
 
 void (*SX127xDriver::RXdoneCallback1)() = &nullCallback;
 void (*SX127xDriver::RXdoneCallback2)() = &nullCallback;
@@ -427,7 +427,7 @@ hw_timer_t *timer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 TaskHandle_t TimerTask_handle = NULL;
 
-void ICACHE_RAM_ATTR SX127xDriver::TimerTask_ISRhandler()
+void SX127xDriver::TimerTask_ISRhandler()
 {
   portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
   portENTER_CRITICAL(&myMutex);

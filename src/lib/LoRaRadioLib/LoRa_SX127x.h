@@ -201,7 +201,7 @@ public:
     static int8_t ICACHE_RAM_ATTR GetCurrRSSI();
 
     ////////////Non-blocking TX related Functions/////////////////
-    static void nullCallback(void);
+    //static void ICACHE_RAM_ATTR nullCallback(void);
 
     static void ICACHE_RAM_ATTR StartTimerTask(); //Start Cont TX mode, sends data continuiously
     static void ICACHE_RAM_ATTR StopTimerTask();
