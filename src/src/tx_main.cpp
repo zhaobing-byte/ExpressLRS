@@ -97,8 +97,6 @@ void OnRFModePacket(mspPacket_t* packet);
 void OnTxPowerPacket(mspPacket_t* packet);
 void OnTLMRatePacket(mspPacket_t* packet);
 
-uint8_t baseMac[6];
-
 void ICACHE_RAM_ATTR ProcessTLMpacket()
 {
   uint8_t calculatedCRC = CalcCRC(Radio.RXdataBuffer, 7) + CRCCaesarCipher;
@@ -531,34 +529,6 @@ void setup()
 #endif
 
   Serial.println("ExpressLRS TX Module Booted...");
-
-#ifdef PLATFORM_ESP32
-  //WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
-
-  //strip.Begin();
-
-  // Get base mac address
-  esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
-  // Print base mac address
-  // This should be copied to common.h and is used to generate a unique hop sequence, DeviceAddr, and CRC.
-  // UID[0..2] are OUI (organisationally unique identifier) and are not ESP32 unique.  Do not use!
-  Serial.println("");
-  Serial.println("Copy the below line into common.h.");
-  Serial.print("uint8_t UID[6] = {");
-  Serial.print(baseMac[0]);
-  Serial.print(", ");
-  Serial.print(baseMac[1]);
-  Serial.print(", ");
-  Serial.print(baseMac[2]);
-  Serial.print(", ");
-  Serial.print(baseMac[3]);
-  Serial.print(", ");
-  Serial.print(baseMac[4]);
-  Serial.print(", ");
-  Serial.print(baseMac[5]);
-  Serial.println("};");
-  Serial.println("");
-#endif
 
   FHSSrandomiseFHSSsequence();
 
