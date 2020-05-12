@@ -42,16 +42,17 @@ int8_t ExpressLRS_prevPower = 0;
 connectionState_e connectionState = disconnected;
 connectionState_e connectionStatePrev = disconnected;
 
-uint8_t UID[6] = {0}; // <- TODO set to bind UID so a new Rx defaults to binding
 #ifndef MY_UID
     #ifdef PLATFORM_ESP32
+        uint8_t UID[6];
         esp_err_t WiFiErr = esp_read_mac(UID, ESP_MAC_WIFI_STA);
-    #endif
-    #ifdef TARGET_R9M_TX
-        UID[6] = {HAL_GetUIDw0(), HAL_GetUIDw0() >> 8, HAL_GetUIDw1(), HAL_GetUIDw1() >> 8, HAL_GetUIDw2(), HAL_GetUIDw2() >> 8};
+    #elif TARGET_R9M_TX
+        uint8_t UID[6] = {HAL_GetUIDw0(), HAL_GetUIDw0() >> 8, HAL_GetUIDw1(), HAL_GetUIDw1() >> 8, HAL_GetUIDw2(), HAL_GetUIDw2() >> 8};
+    #else
+        uint8_t UID[6] = {0}; // <- TODO set to bind UID so a new Rx defaults to binding
     #endif
 #else
-    UID[6] = {MY_UID};
+    uint8_t UID[6] = {MY_UID};
 #endif
 
 uint8_t CRCCaesarCipher = UID[4];
