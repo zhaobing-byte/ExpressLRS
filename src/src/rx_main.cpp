@@ -16,7 +16,7 @@ SX1280Driver Radio;
 #error "Radio configuration is not valid!"
 #endif
 
-#include "crc.h"
+#include <crsf_protocol.h>
 #include "CRSF.h"
 #include <Telemetry.h>
 #include "FHSS.h"
@@ -1126,5 +1126,17 @@ void OnELRSBindMSP(mspPacket_t *packet)
     while (Serial.available())
     {
         telemetry.RXhandleUARTin(Serial.read());
+
+        if (telemetry.callBootloader)
+        {
+            #if defined(PLATFORM_STM32)
+                delay(100);
+                Serial.println("Jumping to Bootloader...");
+                delay(100);
+                HAL_NVIC_SystemReset();
+            #endif
+
+            telemetry.callBootloader = false;
+        }
     }
 }
