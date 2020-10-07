@@ -246,10 +246,10 @@ void ICACHE_RAM_ATTR HandleSendTelemetryResponse()
     openTxRSSI = 255 - openTxRSSI;
     Radio.TXdataBuffer[2] = openTxRSSI;
 
-    Radio.TXdataBuffer[3] = (crsf.TLMbattSensor.voltage & 0xFF00) >> 8;
+    Radio.TXdataBuffer[3] = telemetry.ReceivedPackagesCount();
     Radio.TXdataBuffer[4] = crsf.LinkStatistics.uplink_SNR;
     Radio.TXdataBuffer[5] = crsf.LinkStatistics.uplink_Link_quality;
-    Radio.TXdataBuffer[6] = (crsf.TLMbattSensor.voltage & 0x00FF);
+    Radio.TXdataBuffer[6] = telemetry.UpdatedPayloadCount();
 
     uint8_t crc = ota_crc.calc(Radio.TXdataBuffer, 7) + CRCCaesarCipher;
     Radio.TXdataBuffer[7] = crc;
@@ -842,6 +842,7 @@ void setup()
     SetRFLinkRate(RATE_DEFAULT);
 #endif
 
+    telemetry.ResetState();
     Radio.RXnb();
     crsf.Begin();
     hwTimer.init();
