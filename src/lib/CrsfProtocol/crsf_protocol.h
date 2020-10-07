@@ -6,7 +6,7 @@
 #define PACKED __attribute__((packed))
 
 #ifndef ICACHE_RAM_ATTR
-#define ICACHE_RAM_ATTR 
+#define ICACHE_RAM_ATTR
 #endif
 
 #define CRSF_RX_BAUDRATE 420000
