@@ -26,6 +26,7 @@ SX1280Driver Radio;
 #include "hwTimer.h"
 #include "LQCALC.h"
 #include "LowPassFilter.h"
+#include <stubborn_link.h>
 
 #ifdef PLATFORM_ESP8266
 #include "soc/soc.h"
@@ -95,6 +96,10 @@ void EnterBindingMode();
 void ExitBindingMode();
 void SendUIDOverMSP();
 
+StubbornLink telemetryInLink;
+uint8_t CRSFinBuffer[CRSF_MAX_PACKET_LEN];
+volatile bool TelemetryConfirm = false;
+
 // MSP packet handling function defs
 void ProcessMSPPacket(mspPacket_t *packet);
 void OnRFModePacket(mspPacket_t *packet);
@@ -160,10 +165,17 @@ void ICACHE_RAM_ATTR ProcessTLMpacket()
     //crsf.LinkStatistics.downlink_Link_quality = Radio.currPWR;
     crsf.LinkStatistics.rf_Mode = 4 - ExpressLRS_currAirRate_Modparams->index;
 
-    crsf.TLMbattSensor.voltage = (Radio.RXdataBuffer[3] << 8) + Radio.RXdataBuffer[6];
-
     crsf.sendLinkStatisticsToTX();
-    crsf.sendLinkBattSensorToTX();
+    if (telemetryInLink.ReceiveData(Radio.RXdataBuffer[3], Radio.RXdataBuffer[6]))
+    {
+        // flip bit in radio message
+        TelemetryConfirm = !TelemetryConfirm;
+    }
+    uint8_t receivedLength = telemetryInLink.GetReceivedData();
+    if (receivedLength > 0)
+    {
+        crsf.sendTelemetryToTX(receivedLength, CRSFinBuffer);
+    }
   }
 }
 
@@ -368,7 +380,7 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
     else
     {
       #if defined HYBRID_SWITCHES_8
-      GenerateChannelDataHybridSwitch8(Radio.TXdataBuffer, &crsf, DeviceAddr);
+      GenerateChannelDataHybridSwitch8(Radio.TXdataBuffer, &crsf, DeviceAddr, TelemetryConfirm);
       #elif defined SEQ_SWITCHES
       GenerateChannelDataSeqSwitch(Radio.TXdataBuffer, &crsf, DeviceAddr);
       #else
@@ -648,6 +660,8 @@ void setup()
     delay(1000);
     #endif
   }
+  telemetryInLink.ResetState();
+  telemetryInLink.SetDataToReceive(sizeof(CRSFinBuffer), CRSFinBuffer);
   POWERMGNT.setDefaultPower();
 
   eeprom.Begin(); // Init the eeprom
