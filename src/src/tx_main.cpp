@@ -97,7 +97,7 @@ uint8_t baseMac[6];
 
 void ICACHE_RAM_ATTR ProcessTLMpacket()
 {
-  uint8_t calculatedCRC = CalcCRC(Radio.RXdataBuffer, 7) + CRCCaesarCipher;
+  uint8_t calculatedCRC = CalcCRC(Radio.RXdataBuffer, 7, CRCCaesarCipher);
   uint8_t inCRC = Radio.RXdataBuffer[7];
   uint8_t type = Radio.RXdataBuffer[0] & TLM_PACKET;
   uint8_t packetAddr = (Radio.RXdataBuffer[0] & 0b11111100) >> 2;
@@ -187,9 +187,15 @@ void ICACHE_RAM_ATTR GenerateSyncPacketData()
 
 void ICACHE_RAM_ATTR Generate4ChannelData_10bit()
 {
-  uint8_t PacketHeaderAddr;
-  PacketHeaderAddr = (DeviceAddr << 2) + RC_DATA_PACKET;
-  Radio.TXdataBuffer[0] = PacketHeaderAddr;
+  Radio.TXdataBuffer[0] = RC_DATA_PACKET;
+
+  Radio.TXdataBuffer[0] += CRSF_to_BIT(crsf.ChannelDataIn[4]) << 2;
+  Radio.TXdataBuffer[0] += CRSF_to_BIT(crsf.ChannelDataIn[5]) << 3;
+  Radio.TXdataBuffer[0] += CRSF_to_BIT(crsf.ChannelDataIn[6]) << 4;
+  Radio.TXdataBuffer[0] += CRSF_to_BIT(crsf.ChannelDataIn[7]) << 5;
+  Radio.TXdataBuffer[0] += CRSF_to_BIT(crsf.ChannelDataIn[8]) << 6;
+  Radio.TXdataBuffer[0] += CRSF_to_BIT(crsf.ChannelDataIn[9]) << 7;
+
   Radio.TXdataBuffer[1] = ((CRSF_to_UINT10(crsf.ChannelDataIn[0]) & 0b1111111100) >> 2);
   Radio.TXdataBuffer[2] = ((CRSF_to_UINT10(crsf.ChannelDataIn[1]) & 0b1111111100) >> 2);
   Radio.TXdataBuffer[3] = ((CRSF_to_UINT10(crsf.ChannelDataIn[2]) & 0b1111111100) >> 2);
@@ -371,6 +377,7 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
   {
 
     GenerateSyncPacketData();
+    Radio.TXdataBuffer[7] = CalcCRC(Radio.TXdataBuffer, 7, CRCCaesarCipher);
     SyncPacketLastSent = millis();
     //Serial.println("sync");
     //Serial.println(Radio.currFreq);
@@ -380,6 +387,7 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
     if ((millis() > (MSP_PACKET_SEND_INTERVAL + MSPPacketLastSent)) && MSPPacketSendCount)
     {
       GenerateMSPData();
+      Radio.TXdataBuffer[7] = CalcCRC(Radio.TXdataBuffer, 7, CRCCaesarCipher);
       MSPPacketLastSent = millis();
       MSPPacketSendCount--;
     }
@@ -387,17 +395,20 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
     {
       #if defined HYBRID_SWITCHES_8
       GenerateChannelDataHybridSwitch8(Radio.TXdataBuffer, &crsf, DeviceAddr);
+      Radio.TXdataBuffer[7] = CalcCRC(Radio.TXdataBuffer, 7, CRCCaesarCipher);
       #elif defined SEQ_SWITCHES
       GenerateChannelDataSeqSwitch(Radio.TXdataBuffer, &crsf, DeviceAddr);
+      Radio.TXdataBuffer[7] = CalcCRC(Radio.TXdataBuffer, 7, CRCCaesarCipher);
       #else
-      Generate4ChannelData_11bit();
+      // Generate4ChannelData_11bit();
+      Generate4ChannelData_10bit();
+      uint16_t crc = CalcCRC16(Radio.TXdataBuffer, 6, CRCCaesarCipher);
+      Radio.TXdataBuffer[6] = (uint8_t)crc;
+      Radio.TXdataBuffer[7] = (uint8_t)(crc >> 8);;
 #endif
     }
   }
 
-  ///// Next, Calculate the CRC and put it into the buffer /////
-  uint8_t crc = CalcCRC(Radio.TXdataBuffer, 7) + CRCCaesarCipher;
-  Radio.TXdataBuffer[7] = crc;
   Radio.TXnb(Radio.TXdataBuffer, 8);
 }
 

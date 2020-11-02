@@ -1,4 +1,5 @@
 #include "common.h"
+#include "CRSF.h"
 
 // TODO: Validate values for RFmodeCycleAddtionalTime and RFmodeCycleInterval for rates lower than 50HZ
 
@@ -103,7 +104,7 @@ connectionState_e connectionStatePrev = disconnected;
 
 uint8_t UID[6] = {MY_UID};
 
-uint8_t CRCCaesarCipher = UID[4];
+uint16_t CRCCaesarCipher = CalcCRC16(UID, sizeof(UID), 0);
 uint8_t DeviceAddr = UID[5] & 0b111111; // temporarily based on mac until listen before assigning method merged
 
 #define RSSI_FLOOR_NUM_READS 5 // number of times to sweep the noise foor to get avg. RSSI reading

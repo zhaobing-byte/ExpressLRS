@@ -182,7 +182,7 @@ void ICACHE_RAM_ATTR CRSF::sendLinkStatisticsToTX()
 
     memcpy(outBuffer + 3, (byte *)&LinkStatistics, LinkStatisticsFrameLength);
 
-    uint8_t crc = CalcCRC(&outBuffer[2], LinkStatisticsFrameLength + 1);
+    uint8_t crc = CalcCRC(&outBuffer[2], LinkStatisticsFrameLength + 1, 0);
 
     outBuffer[LinkStatisticsFrameLength + 3] = crc;
 
@@ -218,7 +218,7 @@ void ICACHE_RAM_ATTR CRSF::sendLUAresponse(uint8_t val[])
         outBuffer[5 + i] = val[i];
     }
 
-    uint8_t crc = CalcCRC(&outBuffer[2], LUArespLength + 1);
+    uint8_t crc = CalcCRC(&outBuffer[2], LUArespLength + 1, 0);
 
     outBuffer[LUArespLength + 3] = crc;
 
@@ -255,7 +255,7 @@ void ICACHE_RAM_ATTR CRSF::sendLinkBattSensorToTX()
     outBuffer[10] = CRSF::TLMbattSensor.capacity;
     outBuffer[11] = CRSF::TLMbattSensor.remaining;
 
-    uint8_t crc = CalcCRC(&outBuffer[2], BattSensorFrameLength + 1);
+    uint8_t crc = CalcCRC(&outBuffer[2], BattSensorFrameLength + 1, 0);
 
     outBuffer[BattSensorFrameLength + 3] = crc;
 
@@ -350,7 +350,7 @@ void ICACHE_RAM_ATTR CRSF::sendSyncPacketToTX(void *pvParameters) // in values i
                 outBuffer[12] = (offset & 0x0000FF00) >> 8;
                 outBuffer[13] = (offset & 0x000000FF) >> 0;
 
-                uint8_t crc = CalcCRC(&outBuffer[2], OpenTXsyncFrameLength + 1);
+                uint8_t crc = CalcCRC(&outBuffer[2], OpenTXsyncFrameLength + 1, 0);
 
                 outBuffer[OpenTXsyncFrameLength + 3] = crc;
 
@@ -404,7 +404,7 @@ void ICACHE_RAM_ATTR CRSF::sendSyncPacketToTX(void *pvParameters) // in values i
 
             memcpy(outBuffer + 3, (byte *)&LinkStatistics, LinkStatisticsFrameLength);
 
-            uint8_t crc = CalcCRC(&outBuffer[2], LinkStatisticsFrameLength + 1);
+            uint8_t crc = CalcCRC(&outBuffer[2], LinkStatisticsFrameLength + 1, 0);
 
             outBuffer[LinkStatisticsFrameLength + 3] = crc;
 #ifndef DEBUG_CRSF_NO_OUTPUT
@@ -424,7 +424,7 @@ void ICACHE_RAM_ATTR CRSF::sendSyncPacketToTX(void *pvParameters) // in values i
 
             memcpy(outBuffer + 3, (byte *)&PackedRCdataOut, RCframeLength);
 
-            uint8_t crc = CalcCRC(&outBuffer[2], RCframeLength + 1);
+            uint8_t crc = CalcCRC(&outBuffer[2], RCframeLength + 1, 0);
 
             outBuffer[RCframeLength + 3] = crc;
 #ifndef DEBUG_CRSF_NO_OUTPUT
@@ -461,7 +461,7 @@ void ICACHE_RAM_ATTR CRSF::sendSyncPacketToTX(void *pvParameters) // in values i
             outBuffer[totalBufferLen - 2] = CalcCRCMsp(&outBuffer[6], ENCAPSULATED_MSP_FRAME_LEN - 2);
 
             // CRSF frame crc
-            outBuffer[totalBufferLen - 1] = CalcCRC(&outBuffer[2], ENCAPSULATED_MSP_FRAME_LEN + CRSF_FRAME_LENGTH_EXT_TYPE_CRC - 1);
+            outBuffer[totalBufferLen - 1] = CalcCRC(&outBuffer[2], ENCAPSULATED_MSP_FRAME_LEN + CRSF_FRAME_LENGTH_EXT_TYPE_CRC - 1, 0);
 
             // SerialOutFIFO.push(totalBufferLen);
             // SerialOutFIFO.pushBytes(outBuffer, totalBufferLen);
@@ -627,7 +627,7 @@ void ICACHE_RAM_ATTR CRSF::sendSyncPacketToTX(void *pvParameters) // in values i
 
                             if ((SerialInPacketPtr == SerialInPacketLen + 2)) // plus 2 because the packlen is referenced from the start of the 'type' flag, IE there are an extra 2 bytes.
                             {
-                                char CalculatedCRC = CalcCRC((uint8_t *)SerialInBuffer + 2, SerialInPacketPtr - 3);
+                                char CalculatedCRC = CalcCRC((uint8_t *)SerialInBuffer + 2, SerialInPacketPtr - 3, 0);
 
                                 if (CalculatedCRC == inChar)
                                 {
@@ -802,7 +802,7 @@ void ICACHE_RAM_ATTR CRSF::sendSyncPacketToTX(void *pvParameters) // in values i
 
                         if (SerialInPacketPtr == SerialInPacketLen + 2) // plus 2 because the packlen is referenced from the start of the 'type' flag, IE there are an extra 2 bytes.
                         {
-                            char CalculatedCRC = CalcCRC((uint8_t *)SerialInBuffer + 2, SerialInPacketPtr - 3);
+                            char CalculatedCRC = CalcCRC((uint8_t *)SerialInBuffer + 2, SerialInPacketPtr - 3, 0);
 
                             if (CalculatedCRC == inChar)
                             {

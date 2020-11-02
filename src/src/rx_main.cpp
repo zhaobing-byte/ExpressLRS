@@ -206,7 +206,7 @@ void ICACHE_RAM_ATTR HandleSendTelemetryResponse()
     Radio.TXdataBuffer[5] = crsf.LinkStatistics.uplink_Link_quality;
     Radio.TXdataBuffer[6] = (crsf.TLMbattSensor.voltage & 0x00FF);
 
-    uint8_t crc = CalcCRC(Radio.TXdataBuffer, 7) + CRCCaesarCipher;
+    uint8_t crc = CalcCRC(Radio.TXdataBuffer, 7, CRCCaesarCipher);
     Radio.TXdataBuffer[7] = crc;
     Radio.TXnb(Radio.TXdataBuffer, 8);
     return;
@@ -348,6 +348,13 @@ void ICACHE_RAM_ATTR UnpackChannelData_10bit()
     crsf.PackedRCdataOut.ch1 = UINT10_to_CRSF((Radio.RXdataBuffer[2] << 2) + ((Radio.RXdataBuffer[5] & 0b00110000) >> 4));
     crsf.PackedRCdataOut.ch2 = UINT10_to_CRSF((Radio.RXdataBuffer[3] << 2) + ((Radio.RXdataBuffer[5] & 0b00001100) >> 2));
     crsf.PackedRCdataOut.ch3 = UINT10_to_CRSF((Radio.RXdataBuffer[4] << 2) + ((Radio.RXdataBuffer[5] & 0b00000011) >> 0));
+    
+    crsf.PackedRCdataOut.ch4 = BIT_to_CRSF(Radio.RXdataBuffer[0] & 0b00000100);
+    crsf.PackedRCdataOut.ch5 = BIT_to_CRSF(Radio.RXdataBuffer[0] & 0b00001000);
+    crsf.PackedRCdataOut.ch6 = BIT_to_CRSF(Radio.RXdataBuffer[0] & 0b00010000);
+    crsf.PackedRCdataOut.ch7 = BIT_to_CRSF(Radio.RXdataBuffer[0] & 0b00100000);
+    crsf.PackedRCdataOut.ch8 = BIT_to_CRSF(Radio.RXdataBuffer[0] & 0b01000000);
+    crsf.PackedRCdataOut.ch9 = BIT_to_CRSF(Radio.RXdataBuffer[0] & 0b10000000);
 }
 
 void ICACHE_RAM_ATTR UnpackMSPData()
@@ -367,13 +374,26 @@ void ICACHE_RAM_ATTR UnpackMSPData()
 void ICACHE_RAM_ATTR ProcessRFPacket()
 {
     beginProcessing = micros();
-    uint8_t calculatedCRC = CalcCRC(Radio.RXdataBuffer, 7) + CRCCaesarCipher;
-    uint8_t inCRC = Radio.RXdataBuffer[7];
-    uint8_t type = Radio.RXdataBuffer[0] & 0b11;
-    uint8_t packetAddr = (Radio.RXdataBuffer[0] & 0b11111100) >> 2;
-
+    
     uint8_t indexIN;
     uint8_t TLMrateIn;
+
+    uint8_t type = Radio.RXdataBuffer[0] & 0b11;
+    uint16_t calculatedCRC;
+    uint16_t inCRC;
+    uint8_t packetAddr;
+
+    if (type == RC_DATA_PACKET)
+    {
+        calculatedCRC = CalcCRC16(Radio.RXdataBuffer, 6, CRCCaesarCipher);
+        inCRC = Radio.RXdataBuffer[6] + (Radio.RXdataBuffer[7] << 8);
+        packetAddr = DeviceAddr;
+    } else
+    {
+        calculatedCRC = CalcCRC(Radio.RXdataBuffer, 7, CRCCaesarCipher);
+        inCRC = Radio.RXdataBuffer[7];
+        packetAddr = (Radio.RXdataBuffer[0] & 0b11111100) >> 2;
+    }
 
     if (inCRC != calculatedCRC)
     {
@@ -411,7 +431,7 @@ void ICACHE_RAM_ATTR ProcessRFPacket()
         #elif defined HYBRID_SWITCHES_8
         UnpackChannelDataHybridSwitches8(Radio.RXdataBuffer, &crsf);
         #else
-        UnpackChannelData_11bit();
+        UnpackChannelData_10bit();
         #endif
         if (connectionState == connected)
         {
