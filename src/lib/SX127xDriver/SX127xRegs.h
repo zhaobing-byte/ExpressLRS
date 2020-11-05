@@ -53,6 +53,12 @@ typedef enum
     SX127x_CR_4_8 = 0b00001000,
 } SX127x_CodingRate;
 
+typedef enum
+{
+    SX127x_LORA_CRC_ON = true,  //!< CRC activated
+    SX127x_LORA_CRC_OFF = false, //!< CRC not used
+} SX127x_RadioLoRaCrcModes_t;
+
 // SX127x series common registers
 #define SX127X_REG_FIFO 0x00
 #define SX127X_REG_OP_MODE 0x01

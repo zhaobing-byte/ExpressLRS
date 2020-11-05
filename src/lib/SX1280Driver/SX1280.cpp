@@ -70,11 +70,11 @@ bool SX1280Driver::Begin()
     return true;
 }
 
-void ICACHE_RAM_ATTR SX1280Driver::Config(SX1280_RadioLoRaBandwidths_t bw, SX1280_RadioLoRaSpreadingFactors_t sf, SX1280_RadioLoRaCodingRates_t cr, uint32_t freq, uint8_t PreambleLength)
+void ICACHE_RAM_ATTR SX1280Driver::Config(SX1280_RadioLoRaBandwidths_t bw, SX1280_RadioLoRaSpreadingFactors_t sf, SX1280_RadioLoRaCodingRates_t cr, uint32_t freq, uint8_t PreambleLength, SX1280_RadioLoRaCrcModes_t crcMode)
 {
     this->SetMode(SX1280_MODE_STDBY_XOSC);
     ConfigModParams(bw, sf, cr);
-    SetPacketParams(PreambleLength, SX1280_LORA_PACKET_IMPLICIT, 8, SX1280_LORA_CRC_OFF, SX1280_LORA_IQ_NORMAL); // TODO don't make static etc.
+    SetPacketParams(PreambleLength, SX1280_LORA_PACKET_IMPLICIT, 8, crcMode, SX1280_LORA_IQ_NORMAL); // TODO don't make static etc.
     SetFrequency(freq);
 }
 
@@ -255,6 +255,20 @@ void SX1280Driver::ClearIrqStatus(uint16_t irqMask)
     hal.WriteCommand(SX1280_RADIO_CLR_IRQSTATUS, buf, sizeof(buf));
 }
 
+void SX1280Driver::GetIrqStatus()
+{
+    uint8_t irqStatusData[2];
+
+    hal.ReadRegister(SX1280_RADIO_GET_IRQSTATUS, irqStatusData, sizeof(irqStatusData));
+
+    irqStatus = (irqStatusData[0] << 8) + irqStatusData[1];
+}
+
+bool SX1280Driver::CheckCrcError()
+{
+    return irqStatus & 0b1000000;
+}
+
 void SX1280Driver::TXnbISR()
 {
     //endTX = micros();
@@ -285,7 +299,15 @@ void SX1280Driver::TXnb(volatile uint8_t *data, uint8_t length)
 void SX1280Driver::RXnbISR()
 {
     instance->currOpmode = SX1280_MODE_FS;
+
+    // grab the status before we clear it
+    instance->GetIrqStatus();
     instance->ClearIrqStatus(SX1280_IRQ_RADIO_ALL);
+    if (instance->CheckCrcError()) {
+        Serial.println("bad hw crc");
+        return;
+    }
+
     uint8_t FIFOaddr = instance->GetRxBufferAddr();
     hal.ReadBuffer(FIFOaddr, instance->RXdataBuffer, TXRXBuffSize);
     instance->GetLastPacketStats();

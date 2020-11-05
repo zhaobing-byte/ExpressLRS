@@ -80,7 +80,7 @@ void SX127xDriver::ConfigLoraDefaults()
   SetPreambleLength(SX127X_PREAMBLE_LENGTH_LSB);
 }
 
-void SX127xDriver::SetBandwidthCodingRate(SX127x_Bandwidth bw, SX127x_CodingRate cr)
+void SX127xDriver::SetBandwidthCodingRate(SX127x_Bandwidth bw, SX127x_CodingRate cr, SX127x_RadioLoRaCrcModes_t crcMode)
 {
   if ((currBW != bw) || (currCR != cr))
   {
@@ -100,7 +100,7 @@ void SX127xDriver::SetBandwidthCodingRate(SX127x_Bandwidth bw, SX127x_CodingRate
         hal.writeRegister(SX127X_REG_MODEM_CONFIG_1, bw | cr | SX1278_HEADER_IMPL_MODE);
       }
 
-      if (crcEnabled)
+      if (crcMode)
       {
         hal.setRegValue(SX127X_REG_MODEM_CONFIG_2, SX1278_RX_CRC_MODE_ON, 2, 2);
       }
@@ -321,18 +321,18 @@ void ICACHE_RAM_ATTR SX127xDriver::SetMode(SX127x_RadioOPmodes mode)
   }
 }
 
-void SX127xDriver::Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen)
+void SX127xDriver::Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, SX127x_RadioLoRaCrcModes_t crcMode)
 {
-  Config(bw, sf, cr, freq, preambleLen, currSyncWord);
+  Config(bw, sf, cr, freq, preambleLen, crcMode, currSyncWord);
 }
 
-void SX127xDriver::Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, uint8_t syncWord)
+void SX127xDriver::Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, SX127x_RadioLoRaCrcModes_t crcMode, uint8_t syncWord)
 {
   ConfigLoraDefaults();
   SetPreambleLength(preambleLen);
   SetOutputPower(currPWR);
   SetSpreadingFactor(sf);
-  SetBandwidthCodingRate(bw, cr);
+  SetBandwidthCodingRate(bw, cr, crcMode);
   SetFrequency(freq);
 }
 

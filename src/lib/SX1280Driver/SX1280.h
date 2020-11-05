@@ -37,6 +37,7 @@ public:
     volatile uint8_t TXdataBuffer[TXRXBuffSize]; // ELRS uses max of 8 bytes
     volatile uint8_t RXdataBuffer[TXRXBuffSize];
 
+    volatile uint16_t irqStatus;
     static uint8_t _syncWord;
 
     SX1280_RadioLoRaBandwidths_t currBW = SX1280_LORA_BW_0800;
@@ -74,7 +75,7 @@ public:
     bool Begin();
     void End();
     void SetMode(SX1280_RadioOperatingModes_t OPmode);
-    void Config(SX1280_RadioLoRaBandwidths_t bw, SX1280_RadioLoRaSpreadingFactors_t sf, SX1280_RadioLoRaCodingRates_t cr, uint32_t freq, uint8_t PreambleLength);
+    void Config(SX1280_RadioLoRaBandwidths_t bw, SX1280_RadioLoRaSpreadingFactors_t sf, SX1280_RadioLoRaCodingRates_t cr, uint32_t freq, uint8_t PreambleLength, SX1280_RadioLoRaCrcModes_t crcMode);
     void ConfigModParams(SX1280_RadioLoRaBandwidths_t bw, SX1280_RadioLoRaSpreadingFactors_t sf, SX1280_RadioLoRaCodingRates_t cr);
     void SetPacketParams(uint8_t PreambleLength, SX1280_RadioLoRaPacketLengthsModes_t HeaderType, uint8_t PayloadLength, SX1280_RadioLoRaCrcModes_t crc, SX1280_RadioLoRaIQModes_t InvertIQ);
     void ICACHE_RAM_ATTR SetFrequency(uint32_t freq);
@@ -90,8 +91,10 @@ public:
     static void ICACHE_RAM_ATTR RXnbISR(); //ISR for non-blocking RC routine
 
     void ICACHE_RAM_ATTR ClearIrqStatus(uint16_t irqMask);
+    void ICACHE_RAM_ATTR GetIrqStatus();
 
     void ICACHE_RAM_ATTR GetStatus();
+    bool ICACHE_RAM_ATTR CheckCrcError();
 
     void SetDioIrqParams(uint16_t irqMask, uint16_t dio1Mask, uint16_t dio2Mask, uint16_t dio3Mask);
     

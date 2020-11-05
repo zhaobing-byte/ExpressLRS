@@ -32,7 +32,6 @@ public:
     static volatile WORD_ALIGNED_ATTR uint8_t RXdataBuffer[TXRXBuffSize];
 
     bool headerExplMode = false;
-    bool crcEnabled = false;
 
     //// Parameters ////
     uint32_t currFreq = 0; // leave as 0 to ensure that it gets set
@@ -63,12 +62,12 @@ public:
     bool Begin();
     void End();
     bool DetectChip();
-    void Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, uint8_t syncWord);
-    void Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen);
+    void Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, SX127x_RadioLoRaCrcModes_t crcMode, uint8_t syncWord);
+    void Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, SX127x_RadioLoRaCrcModes_t crcMode);
     void SetMode(SX127x_RadioOPmodes mode);
     void ConfigLoraDefaults();
 
-    void SetBandwidthCodingRate(SX127x_Bandwidth bw, SX127x_CodingRate cr);
+    void SetBandwidthCodingRate(SX127x_Bandwidth bw, SX127x_CodingRate cr, SX127x_RadioLoRaCrcModes_t crcMode);
 
     void SetSyncWord(uint8_t syncWord);
     void SetOutputPower(uint8_t Power);
