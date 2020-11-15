@@ -16,6 +16,20 @@
 #endif
 #endif
 
+#ifdef NeutronRC_TX_900
+#define GPIO_PIN_NSS          5
+#define GPIO_PIN_BUSY        -1 // NOT USED ON THIS TARGET
+#define GPIO_PIN_DIO0        19
+#define GPIO_PIN_DIO1        -1
+#define GPIO_PIN_MOSI        16
+#define GPIO_PIN_MISO         4
+#define GPIO_PIN_SCK         17
+#define GPIO_PIN_RST         18
+#define GPIO_PIN_RCSIGNAL_RX 27
+#define GPIO_PIN_RCSIGNAL_TX 27 // so we don't have to solder the extra resistor, we switch rx/tx using gpio mux
+#define GPIO_PIN_LED         22
+#endif
+
 #ifdef TARGET_TTGO_LORA_V1_AS_TX
 #define GPIO_PIN_NSS 18
 #define GPIO_PIN_BUSY           -1 // NOT USED ON THIS TARGET
