@@ -85,7 +85,7 @@ PowerLevels_e POWERMGNT::setPower(PowerLevels_e Power)
     return CurrentPower;
 #endif
 
-#if defined(TARGET_100mW_MODULE) || defined(TARGET_R9M_LITE_TX)
+#if defined(TARGET_SX127X_NO_PA) || defined(TARGET_R9M_LITE_TX)
     switch (Power)
     {
     case PWR_10mW:

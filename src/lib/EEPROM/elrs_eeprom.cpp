@@ -5,7 +5,7 @@
 
 #if defined(TARGET_R9M_TX) || defined(TARGET_R9M_LITE_TX) || defined(TARGET_R9M_LITE_PRO_TX)
     extEEPROM EEPROM(kbits_2, 1, 1, 0x51);
-#elif defined(TARGET_R9M_RX)
+#elif defined(TARGET_R9MM_RX)
     extEEPROM EEPROM(kbits_2, 1, 1, 0x50);
 #else
 #define NO_EEPROM 1

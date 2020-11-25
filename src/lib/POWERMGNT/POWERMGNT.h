@@ -24,7 +24,7 @@
 #define DefaultPowerEnum 0
 #endif
 
-#ifdef TARGET_100mW_MODULE
+#ifdef TARGET_SX127X_NO_PA
 #define MaxPower 2
 #define DefaultPowerEnum 2
 #endif

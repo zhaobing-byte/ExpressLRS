@@ -42,7 +42,7 @@ button button;
 R9DAC R9DAC;
 #endif
 
-#if defined(TARGET_R9M_LITE_TX) || (TARGET_R9M_LITE_PRO_TX)
+#if defined(PLATFORM_STM32)
 #include "STM32_hwTimer.h"
 #endif
 const uint8_t thisCommit[6] = {LATEST_COMMIT};
