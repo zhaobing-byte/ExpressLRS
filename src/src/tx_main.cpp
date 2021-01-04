@@ -272,8 +272,8 @@ void ICACHE_RAM_ATTR SetRFLinkRate(uint8_t index) // Set speed of RF link (hz)
 
   crsf.setSyncParams(ModParams->interval);
   connectionState = connected;
-
-#ifdef PLATFORM_ESP32
+  
+#if defined(PLATFORM_ESP32) && defined(GPIO_PIN_LED)
   updateLEDstrip();
 #endif
 }
