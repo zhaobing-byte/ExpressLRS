@@ -137,6 +137,9 @@ void ICACHE_RAM_ATTR ProcessTLMpacket()
     connectionState = connected;
     LPD_DownlinkLQ.init(100);
     Serial.println("got downlink conn");
+#if defined(PLATFORM_ESP32) && defined(GPIO_PIN_LED)
+    updateLEDstrip();
+#endif
   }
 
   LastTLMpacketRecvMillis = millis();
@@ -271,7 +274,7 @@ void ICACHE_RAM_ATTR SetRFLinkRate(uint8_t index) // Set speed of RF link (hz)
   connectionState = connected;
 
 #ifdef PLATFORM_ESP32
-  updateLEDs(connectionState, ExpressLRS_currAirRate_Modparams->TLMinterval);
+  updateLEDstrip();
 #endif
 }
 
@@ -661,6 +664,9 @@ void loop()
     HandleWebUpdate();
     return;
   }
+#ifdef GPIO_PIN_LED
+  updateLEDstripLoop((uint8_t)connectionState, (uint8_t)ExpressLRS_currAirRate_Modparams->TLMinterval);
+#endif
 #endif
 
   HandleUpdateParameter();
