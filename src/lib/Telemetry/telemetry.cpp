@@ -9,7 +9,7 @@ using namespace std;
 #endif
 //#define TARGET_R9M_RX
 
-#if defined(PLATFORM_ESP8266) || defined(TARGET_R9M_RX) || defined(UNIT_TEST)
+//#if defined(PLATFORM_ESP8266) || defined(TARGET_R9M_RX) || defined(UNIT_TEST)
 
 telemetry_state_s Telemetry::telemtry_state = TELEMTRY_IDLE;
 uint8_t Telemetry::CRSFinBuffer[CRSF_MAX_PACKET_LEN] = {0};
@@ -182,4 +182,4 @@ void Telemetry::AppendTelemetryPackage()
         }
     }
 }
-#endif
+//#endif

@@ -4,8 +4,6 @@
 #include "common.h"
 #include "LowPassFilter.h"
 
-#define TARGET_R9M_RX 1
-#define Regulatory_Domain_EU_868 1
 #if defined(Regulatory_Domain_AU_915) || defined(Regulatory_Domain_EU_868) || defined(Regulatory_Domain_FCC_915) || defined(Regulatory_Domain_AU_433) || defined(Regulatory_Domain_EU_433)
 #include "SX127xDriver.h"
 SX127xDriver Radio;
@@ -14,6 +12,16 @@ SX127xDriver Radio;
 SX1280Driver Radio;
 #else
 #error "Radio configuration is not valid!"
+#endif
+
+#if defined(TARGET_RX_GHOST_ATTO_V1) /* !TARGET_RX_GHOST_ATTO_V1 */
+    #define RX_SERIAL RxSerial
+    HardwareSerial RxSerial(USART1, HALF_DUPLEX_ENABLED);
+#elif defined(TARGET_R9SLIMPLUS_RX) /* !TARGET_R9SLIMPLUS_RX */
+    #define RX_SERIAL RxSerial
+    HardwareSerial RxSerial(USART3);
+#else
+    #define RX_SERIAL Serial
 #endif
 
 #include <crsf_protocol.h>
@@ -32,10 +40,6 @@ SX1280Driver Radio;
 
 #ifdef PLATFORM_ESP8266
 #include "ESP8266_WebUpdate.h"
-#endif
-
-#ifdef PLATFORM_STM32
-#include "STM32_UARTinHandler.h"
 #endif
 
 #ifdef TARGET_RX_GHOST_ATTO_V1
@@ -697,8 +701,8 @@ void setup()
 
 #ifdef PLATFORM_STM32
 #if defined(TARGET_R9SLIMPLUS_RX)
-    CRSF_RX_SERIAL.setRx(GPIO_PIN_RCSIGNAL_RX);
-    CRSF_RX_SERIAL.begin(CRSF_RX_BAUDRATE);
+    RX_SERIAL.setRx(GPIO_PIN_RCSIGNAL_RX);
+    RX_SERIAL.begin(CRSF_RX_BAUDRATE);
 
     Serial.setTx(GPIO_PIN_RCSIGNAL_TX);
 #else /* !TARGET_R9SLIMPLUS_RX */
@@ -710,10 +714,10 @@ void setup()
 #endif /* TARGET_R9SLIMPLUS_RX */
 #if defined(TARGET_RX_GHOST_ATTO_V1)
     // USART1 is used for RX (half duplex)
-    CRSF_RX_SERIAL.setHalfDuplex();
-    CRSF_RX_SERIAL.setTx(GPIO_PIN_RCSIGNAL_RX);
-    CRSF_RX_SERIAL.begin(CRSF_RX_BAUDRATE);
-    CRSF_RX_SERIAL.enableHalfDuplexRx();
+    RX_SERIAL.setHalfDuplex();
+    RX_SERIAL.setTx(GPIO_PIN_RCSIGNAL_RX);
+    RX_SERIAL.begin(CRSF_RX_BAUDRATE);
+    RX_SERIAL.enableHalfDuplexRx();
 
     // USART2 is used for TX (half duplex)
     // Note: these must be set before begin()
@@ -1142,7 +1146,7 @@ void OnELRSBindMSP(mspPacket_t *packet)
     ExitBindingMode();
     while (Serial.available())
     {
-        telemetry.RXhandleUARTin(Serial.read());
+        telemetry.RXhandleUARTin(RX_SERIAL.read());
 
         if (telemetry.callBootloader)
         {
