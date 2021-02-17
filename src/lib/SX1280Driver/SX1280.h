@@ -25,8 +25,8 @@ public:
     void (*RXdoneCallback)() = &nullCallback; //function pointer for callback
     void (*TXdoneCallback)() = &nullCallback; //function pointer for callback
 
-    static void (*TXtimeout)(); //function pointer for callback
-    static void (*RXtimeout)(); //function pointer for callback
+    void (*TXtimeout)() = &nullCallback;//function pointer for callback
+    //static void (*RXtimeout)(); //function pointer for callback
 
     InterruptAssignment_ InterruptAssignment = NONE;
     /////////////////////////////
@@ -55,12 +55,14 @@ public:
     int8_t LastPacketSNR = 0;
     volatile uint8_t NonceTX = 0;
     volatile uint8_t NonceRX = 0;
-    static uint32_t TotalTime;
-    static uint32_t TimeOnAir;
-    static uint32_t TXstartMicros;
-    static uint32_t TXspiTime;
-    static uint32_t HeadRoom;
-    static uint32_t TXdoneMicros;
+    uint32_t TotalTime;
+    uint32_t TimeOnAir;
+    uint32_t TXnbStartMicros;  // timestamp where the first call to TXnb() is called. (used to calculate timeout)
+    uint32_t TXotaStartMicros; // timestamp when the radio begins transmitting
+    uint32_t TXspiTime;
+    uint32_t TimeoutThreshold; // if micros() since TXnb() begin exceeds this value just before SetMode(SX1280_MODE_TX); we call timeout and abort.
+    uint32_t ActualHeadRoom;
+    uint32_t TXdoneMicros;
     /////////////////////////////////
 
     //// Local Variables //// Copy of values for SPI speed optimisation
@@ -74,7 +76,7 @@ public:
     bool Begin();
     void End();
     void SetMode(SX1280_RadioOperatingModes_t OPmode);
-    void Config(SX1280_RadioLoRaBandwidths_t bw, SX1280_RadioLoRaSpreadingFactors_t sf, SX1280_RadioLoRaCodingRates_t cr, uint32_t freq, uint8_t PreambleLength);
+    void Config(SX1280_RadioLoRaBandwidths_t bw, SX1280_RadioLoRaSpreadingFactors_t sf, SX1280_RadioLoRaCodingRates_t cr, uint32_t freq, uint8_t PreambleLength, uint32_t PacketInterval, uint32_t EstOTAtime);
     void ConfigModParams(SX1280_RadioLoRaBandwidths_t bw, SX1280_RadioLoRaSpreadingFactors_t sf, SX1280_RadioLoRaCodingRates_t cr);
     void SetPacketParams(uint8_t PreambleLength, SX1280_RadioLoRaPacketLengthsModes_t HeaderType, uint8_t PayloadLength, SX1280_RadioLoRaCrcModes_t crc, SX1280_RadioLoRaIQModes_t InvertIQ);
     void ICACHE_RAM_ATTR SetFrequency(uint32_t freq);
@@ -88,6 +90,7 @@ public:
 
     static void ICACHE_RAM_ATTR RXnb();
     static void ICACHE_RAM_ATTR RXnbISR(); //ISR for non-blocking RC routine
+    static void ICACHE_RAM_ATTR RXtimeout();
 
     void ICACHE_RAM_ATTR ClearIrqStatus(uint16_t irqMask);
 

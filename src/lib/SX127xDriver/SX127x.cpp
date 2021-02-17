@@ -9,7 +9,7 @@ void (*SX127xDriver::RXdoneCallback)() = &nullCallback;
 void (*SX127xDriver::TXdoneCallback)() = &nullCallback;
 
 void (*SX127xDriver::TXtimeout)() = &nullCallback;
-void (*SX127xDriver::RXtimeout)() = &nullCallback;
+//void (*SX127xDriver::RXtimeout)() = &nullCallback;
 
 volatile WORD_ALIGNED_ATTR uint8_t SX127xDriver::TXdataBuffer[TXRXBuffSize] = {0};
 volatile WORD_ALIGNED_ATTR uint8_t SX127xDriver::RXdataBuffer[TXRXBuffSize] = {0};
@@ -297,6 +297,11 @@ void ICACHE_RAM_ATTR SX127xDriver::RXnbISR()
   RXdoneCallback();
 }
 
+void ICACHE_RAM_ATTR SX127xDriver::RXtimeout()
+{
+  RXnb();
+}
+
 void ICACHE_RAM_ATTR SX127xDriver::RXnb()
 {
   // if (instance->currOpmode == SX127x_OPMODE_RXCONTINUOUS)
@@ -321,7 +326,7 @@ void ICACHE_RAM_ATTR SX127xDriver::SetMode(SX127x_RadioOPmodes mode)
   }
 }
 
-void SX127xDriver::Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen)
+void SX127xDriver::Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, uint32_t PacketInterval, uint32_t EstOTAtime)
 {
   Config(bw, sf, cr, freq, preambleLen, currSyncWord);
 }

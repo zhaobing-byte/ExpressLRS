@@ -170,7 +170,7 @@ void SetRFLinkRate(uint8_t index) // Set speed of RF link (hz)
         expresslrs_mod_settings_s *const ModParams = get_elrs_airRateConfig(index);
         expresslrs_rf_pref_params_s *const RFperf = get_elrs_RFperfParams(index);
 
-        Radio.Config(ModParams->bw, ModParams->sf, ModParams->cr, GetInitialFreq(), ModParams->PreambleLen);
+        Radio.Config(ModParams->bw, ModParams->sf, ModParams->cr, GetInitialFreq(), ModParams->PreambleLen, ModParams->interval, RFperf->TOA);
         hwTimer.updateInterval(ModParams->interval);
 
         ExpressLRS_currAirRate_Modparams = ModParams;
@@ -295,6 +295,23 @@ void ICACHE_RAM_ATTR HWtimerCallbackTick() // this is 180 out of phase with the 
     uplinkLQ = LQCALC.getLQ();
     LQCALC.inc();
     crsf.RXhandleUARTout();
+
+    // code below handles RX timeout case
+    uint8_t modresult = (NonceRX - 1) % TLMratioEnumToValue(ExpressLRS_currAirRate_Modparams->TLMinterval); // frame was is TLM resp
+    int32_t lastPkt = (int32_t)(micros() - doneProcessing);
+
+    if (modresult == 0) // Did not expect a tlm resp last frame
+    {
+        lastPkt -= (int32_t)ExpressLRS_currAirRate_Modparams->interval; //we expected a dropped frame here so subtract
+    }
+
+    if (lastPkt > (int32_t)(ExpressLRS_currAirRate_Modparams->interval))
+    {
+        if (connectionState == connected && modresult != 0)
+        {
+            Radio.RXtimeout(); // since if modresult1 == 0 we are gonna send TLM resp and reset radio anyway
+        }
+    }
 }
 
 void ICACHE_RAM_ATTR HWtimerCallbackTock()

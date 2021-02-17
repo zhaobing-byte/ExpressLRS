@@ -21,7 +21,7 @@ public:
     static void (*TXdoneCallback)(); //function pointer for callback
 
     static void (*TXtimeout)(); //function pointer for callback
-    static void (*RXtimeout)(); //function pointer for callback
+    //static void (*RXtimeout)(); //function pointer for callback
 
 ///////////Radio Variables////////
     #define TXRXBuffSize 8
@@ -64,7 +64,7 @@ public:
     void End();
     bool DetectChip();
     void Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, uint8_t syncWord);
-    void Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen);
+    void Config(SX127x_Bandwidth bw, SX127x_SpreadingFactor sf, SX127x_CodingRate cr, uint32_t freq, uint8_t preambleLen, uint32_t PacketInterval, uint32_t EstOTAtime);
     void SetMode(SX127x_RadioOPmodes mode);
     void ConfigLoraDefaults();
 
@@ -103,6 +103,7 @@ public:
     /////////////Non-blocking RX related Functions///////////////
     static void ICACHE_RAM_ATTR RXnb();
     static void ICACHE_RAM_ATTR RXnbISR(); //ISR for non-blocking RC routin
+    static void ICACHE_RAM_ATTR RXtimeout(); //ISR for non-blocking RC routin
 
 private:
 };
