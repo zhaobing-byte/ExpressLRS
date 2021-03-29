@@ -13,8 +13,6 @@ if stm and "$UPLOADER $UPLOADERFLAGS" in env.get('UPLOADCMD', '$UPLOADER $UPLOAD
     if target_name == "FRSKY_TX_R9M_VIA_STLINK_OLD_BOOTLOADER_DEPRECATED":
         print("you are using the old bootloader, please update this will be removed soon")
         env.AddPostAction("buildprog", [opentx.gen_frsky])
-    elif "APLHA_900_TX" in target_name:
-        env.Replace(UPLOADCMD=upload_via_esp8266_backpack.on_upload)
     elif "_R9M_" in target_name or "ES915TX" in target_name:
         env.AddPostAction("buildprog", [opentx.gen_elrs])
         if "WIFI" in target_name:
@@ -25,3 +23,5 @@ if stm and "$UPLOADER $UPLOADERFLAGS" in env.get('UPLOADCMD', '$UPLOADER $UPLOAD
         env.Replace(UPLOADCMD=stlink.on_upload)
     elif "_BETAFLIGHTPASSTHROUGH" in target_name:
         env.Replace(UPLOADCMD=UARTupload.on_upload)
+    elif "TX_VIA_WIFI" in target_name:
+        env.Replace(UPLOADCMD=upload_via_esp8266_backpack.on_upload)
