@@ -357,6 +357,39 @@ https://github.com/jaxxzer
 
 #define timerOffset          1
 
+#elif defined(TARGET_TX_BETAFPV_V1)
+#define GPIO_PIN_NSS 5
+#define GPIO_PIN_BUSY 21
+#define GPIO_PIN_DIO0 -1
+#define GPIO_PIN_DIO1 4
+#define GPIO_PIN_MOSI 23
+#define GPIO_PIN_MISO 19
+#define GPIO_PIN_SCK 18
+#define GPIO_PIN_RST 14
+#define GPIO_PIN_RX_ENABLE 27
+#define GPIO_PIN_TX_ENABLE 26
+#define GPIO_PIN_OLED_SDA -1
+#define GPIO_PIN_OLED_SCK -1
+#define GPIO_PIN_RCSIGNAL_RX 13
+#define GPIO_PIN_RCSIGNAL_TX 13
+
+#elif defined(TARGET_RX_BETAFPV_V1)
+#define GPIO_PIN_NSS 15
+#define GPIO_PIN_BUSY 5
+#define GPIO_PIN_DIO0 -1 
+#define GPIO_PIN_DIO1 4
+#define GPIO_PIN_MOSI 13
+#define GPIO_PIN_MISO 12
+#define GPIO_PIN_SCK 14
+#define GPIO_PIN_RST 2
+#define GPIO_PIN_RCSIGNAL_RX -1 
+#define GPIO_PIN_RCSIGNAL_TX -1
+#define GPIO_PIN_LED 16
+#define GPIO_PIN_BUTTON 0
+#define timerOffset -1
+#define GPIO_PIN_RX_ENABLE 9 //enable pa
+#define GPIO_PIN_TX_ENABLE 10
+
 #else
 #error "Unknown target!"
 #endif

@@ -82,6 +82,18 @@ PowerLevels_e POWERMGNT::setPower(PowerLevels_e Power)
         Power = PWR_25mW;
         break;
     }
+#elif defined(TARGET_RX_BETAFPV_V1)
+    switch (Power)
+    {
+    case PWR_10mW:
+        Radio.SetOutputPower(8);
+        break;
+    case PWR_25mW:
+    default:
+        Radio.SetOutputPower(13);
+        Power = PWR_25mW;
+        break;
+    }
 #elif defined(TARGET_TX_GHOST)
     switch (Power)
     {
@@ -223,6 +235,32 @@ PowerLevels_e POWERMGNT::setPower(PowerLevels_e Power)
     default:
         Power = PWR_50mW;
         Radio.SetOutputPower(3);
+        break;
+    }
+#elif defined(TARGET_TX_BETAFPV_V1)
+    switch (Power)
+    {
+    case PWR_10mW:
+        Radio.SetOutputPower(-15);
+        break;
+    case PWR_25mW:
+        Radio.SetOutputPower(-11);
+        break;
+    case PWR_50mW:
+        Radio.SetOutputPower(-8);
+        break;
+    case PWR_100mW:
+        Radio.SetOutputPower(-5);
+        break;
+    case PWR_250mW:
+        Radio.SetOutputPower(-1);
+        break;
+    case PWR_500mW:
+        Radio.SetOutputPower(13);
+        break;
+    default:
+        Power = PWR_50mW;
+        Radio.SetOutputPower(-8);
         break;
     }
 #else
