@@ -16,6 +16,7 @@ SX1280Driver Radio;
 
 #include "crc.h"
 #include "CRSF.h"
+#include "SBUS.h"
 #include "telemetry_protocol.h"
 #include "telemetry.h"
 #ifdef ENABLE_TELEMETRY
@@ -67,6 +68,7 @@ hwTimer hwTimer;
 PFD PFDloop; 
 GENERIC_CRC8 ota_crc(ELRS_CRC_POLY);
 CRSF crsf(Serial); //pass a serial port object to the class for it to use
+SBUS sbus(Serial);
 ELRS_EEPROM eeprom;
 RxConfig config;
 Telemetry telemetry;
@@ -615,7 +617,8 @@ void ICACHE_RAM_ATTR ProcessRFPacket()
         #endif
         if (connectionState == connected)
         {
-            crsf.sendRCFrameToFC();
+            //crsf.sendRCFrameToFC();
+            sbus.sendRCFrameToFC();
         }
         break;
 
@@ -829,7 +832,7 @@ void setup()
 #endif /* TARGET_RX_GHOST_ATTO_V1 */
 #endif /* PLATFORM_STM32 */
 
-    Serial.begin(CRSF_RX_BAUDRATE);
+    Serial.begin(CRSF_RX_BAUDRATE,SERIAL_8E2);
 
     Serial.println("ExpressLRS Module Booting...");
 

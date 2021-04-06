@@ -12,6 +12,7 @@ SX1280Driver Radio;
 #endif
 
 #include "CRSF.h"
+#include "SBUS.h"
 #include "FHSS.h"
 #include "LED.h"
 // #include "debug.h"
@@ -71,6 +72,7 @@ const uint8_t thisCommit[6] = {LATEST_COMMIT};
 hwTimer hwTimer;
 GENERIC_CRC8 ota_crc(ELRS_CRC_POLY);
 CRSF crsf;
+SBUS sbus;
 POWERMGNT POWERMGNT;
 MSP msp;
 ELRS_EEPROM eeprom;

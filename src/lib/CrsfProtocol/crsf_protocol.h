@@ -24,7 +24,8 @@
 #endif
 
 #define CRSF_CRC_POLY 0xd5
-#define CRSF_RX_BAUDRATE 420000
+//更改过
+#define CRSF_RX_BAUDRATE 100000
 #define CRSF_OPENTX_FAST_BAUDRATE 400000
 #define CRSF_OPENTX_SLOW_BAUDRATE 115200 // Used for QX7 not supporting 400kbps
 #define CRSF_NUM_CHANNELS 16
