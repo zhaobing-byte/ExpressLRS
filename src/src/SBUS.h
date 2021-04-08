@@ -29,8 +29,9 @@ public:
 
     #endif
 
-    void  sendRCFrameToFC();
-
+    void sendRCFrameToFC();
+    void sendLinkStateToFC();
+    unsigned AUX12 : 11;
 private:
     Stream *_dev;    
 };

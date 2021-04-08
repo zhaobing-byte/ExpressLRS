@@ -1030,9 +1030,13 @@ void loop()
             Serial.println(ExpressLRS_currAirRate_Modparams->interval);
             scanIndex++;
             getRFlinkInfo();
-            crsf.sendLinkStatisticsToFC();
-            delay(100);
-            crsf.sendLinkStatisticsToFC(); // need to send twice, not sure why, seems like a BF bug?
+            #ifdef USE_BETAFPV_SBUS
+                sbus.sendRCFrameToFC();
+            #else
+                crsf.sendLinkStatisticsToFC();
+                delay(100);
+                crsf.sendLinkStatisticsToFC(); // need to send twice, not sure why, seems like a BF bug?
+            #endif
             Radio.RXnb();
             if (!InBindingMode)
             {
@@ -1063,7 +1067,11 @@ void loop()
         if (connectionState != disconnected)
         {
             getRFlinkInfo();
-            crsf.sendLinkStatisticsToFC();
+            #ifdef USE_BETAFPV_SBUS
+                sbus.sendRCFrameToFC();
+            #else
+                crsf.sendLinkStatisticsToFC();
+            #endif
             SendLinkStatstoFCintervalLastSent = millis();
         }
     }

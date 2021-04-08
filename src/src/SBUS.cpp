@@ -2,9 +2,12 @@
 
 #include "SBUS.h"
 #include "CRSF.h"
+#include "common.h"
 
 extern CRSF crsf;
 extern uint8_t uplinkLQ;
+extern connectionState_e connectionState;
+extern bool webUpdateMode;
 void ICACHE_RAM_ATTR SBUS::sendRCFrameToFC()
 {
     AUX12 = map(uplinkLQ,0,100,173,1811);
@@ -36,8 +39,14 @@ void ICACHE_RAM_ATTR SBUS::sendRCFrameToFC()
     outBuffer[21] |= (AUX12 << 5);
     outBuffer[22] = (AUX12 >> 3 ) & 0xFF;
     //flags
-    outBuffer[23] = 0x00;
-
+    if ((connectionState == disconnected) && !webUpdateMode)
+    {
+        outBuffer[23] = 0x0C;
+    }
+    else
+    {
+        outBuffer[23] = 0x0;
+    }
     outBuffer[24] = SBUS_END_BYTE;
     
     this->_dev->write(outBuffer, SBUSframeLength);
