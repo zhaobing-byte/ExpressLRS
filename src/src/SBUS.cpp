@@ -4,8 +4,10 @@
 #include "CRSF.h"
 
 extern CRSF crsf;
+extern uint8_t uplinkLQ;
 void ICACHE_RAM_ATTR SBUS::sendRCFrameToFC()
 {
+    AUX12 = map(uplinkLQ,0,100,173,1811);
     uint8_t outBuffer[SBUSframeLength] = {0};
 
     outBuffer[0] = SBUS_HEAD_BYTE;
@@ -30,8 +32,9 @@ void ICACHE_RAM_ATTR SBUS::sendRCFrameToFC()
     outBuffer[18] = 0x00;
     outBuffer[19] = 0x00;
     outBuffer[20] = 0x00;
-    outBuffer[21] = 0x00;
-    outBuffer[22] = 0x00;
+    outBuffer[21] = (AUX12 << 5 | 0x00 >> 6 ) & 0xFF;
+    outBuffer[21] |= (AUX12 << 5);
+    outBuffer[22] = (AUX12 >> 3 ) & 0xFF;
     //flags
     outBuffer[23] = 0x00;
 
