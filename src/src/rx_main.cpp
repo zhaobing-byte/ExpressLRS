@@ -76,6 +76,7 @@ Telemetry telemetry;
 #if defined(TARGET_RX_GHOST_ATTO_V1) /* !TARGET_RX_GHOST_ATTO_V1 */
     #define CRSF_RX_SERIAL CrsfRxSerial
     HardwareSerial CrsfRxSerial(USART1, HALF_DUPLEX_ENABLED);
+    
 #elif defined(TARGET_R9SLIMPLUS_RX) /* !TARGET_R9SLIMPLUS_RX */
     #define CRSF_RX_SERIAL CrsfRxSerial
     HardwareSerial CrsfRxSerial(USART3);
@@ -617,8 +618,11 @@ void ICACHE_RAM_ATTR ProcessRFPacket()
         #endif
         if (connectionState == connected)
         {
-            //crsf.sendRCFrameToFC();
+            #ifdef USE_BETAFPV_SBUS
             sbus.sendRCFrameToFC();
+            #else
+            crsf.sendRCFrameToFC();
+            #endif
         }
         break;
 
@@ -831,9 +835,15 @@ void setup()
     Serial.setTx(GPIO_PIN_RCSIGNAL_TX);
 #endif /* TARGET_RX_GHOST_ATTO_V1 */
 #endif /* PLATFORM_STM32 */
-
-    Serial.begin(CRSF_RX_BAUDRATE,SERIAL_8E2);
-
+    #ifdef USE_BETAFPV_SBUS
+        Serial.begin(SBUS_RX_BAUDRATE,SERIAL_8E2);
+        #if UART0_INVERT
+            uint32_t  *uart0_conf0 = (uint32_t *)UART0_CONF0;
+            (*uart0_conf0) |= UART0_TXD_INV;
+        #endif
+    #else
+        Serial.begin(CRSF_RX_BAUDRATE);
+    #endif
     Serial.println("ExpressLRS Module Booting...");
 
 #ifdef PLATFORM_ESP8266
