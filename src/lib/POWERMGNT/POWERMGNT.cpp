@@ -82,7 +82,7 @@ PowerLevels_e POWERMGNT::setPower(PowerLevels_e Power)
         Power = PWR_25mW;
         break;
     }
-#elif defined(TARGET_RX_BETAFPV_V1)
+#elif defined(TARGET_RX_BETAFPV_2400_V1)
     switch (Power)
     {
     case PWR_10mW:
