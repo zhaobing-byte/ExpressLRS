@@ -20,7 +20,7 @@
 #-DRegulatory_Domain_EU_868
 #-DRegulatory_Domain_AU_433
 #-DRegulatory_Domain_EU_433
--DRegulatory_Domain_FCC_915
+#-DRegulatory_Domain_FCC_915
 #-DRegulatory_Domain_ISM_2400
 
 
@@ -52,6 +52,8 @@
 #-DUSE_R9MM_R9MINI_SBUS
 
 #-DUSE_BETAFPV_SBUS
+
+#-DUSE_BUTTON_BIND
 
 #-DTLM_REPORT_INTERVAL_MS=320U
 

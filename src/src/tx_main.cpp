@@ -655,6 +655,9 @@ void setup()
     TxDAC.init();
   #endif
 
+#if defined(USE_BUTTON_BIND)
+  pinMode(25, INPUT_PULLUP);
+#endif
 
 #if defined(GPIO_PIN_BUTTON) && (GPIO_PIN_BUTTON != UNDEF_PIN)
   button.init(GPIO_PIN_BUTTON, true); // r9 tx appears to be active high
@@ -760,6 +763,15 @@ void loop()
     {
       HandleWebUpdate();
       return;
+    }
+  #endif
+
+
+  #if defined(USE_BUTTON_BIND)
+    int gpio_val = digitalRead(25);
+    if(gpio_val == 0 && !InBindingMode) 
+    {
+      EnterBindingMode();
     }
   #endif
 
