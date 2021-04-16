@@ -237,7 +237,7 @@ PowerLevels_e POWERMGNT::setPower(PowerLevels_e Power)
         Radio.SetOutputPower(3);
         break;
     }
-#elif defined(TARGET_TX_BETAFPV_V1)
+#elif defined(TARGET_TX_BETAFPV_2400_V1)
     switch (Power)
     {
     case PWR_10mW:

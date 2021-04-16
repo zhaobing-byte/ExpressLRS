@@ -60,7 +60,7 @@
 #define DefaultPowerEnum 2
 #endif
 
-#ifdef TARGET_TX_BETAFPV_V1
+#ifdef TARGET_TX_BETAFPV_2400_V1
 #define MaxPower 5
 #define DefaultPowerEnum 2
 #endif
