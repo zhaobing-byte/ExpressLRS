@@ -768,8 +768,8 @@ void loop()
 
 
   #if defined(USE_BUTTON_BIND)
-    int gpio_val = digitalRead(25);
-    if(gpio_val == 0 && !InBindingMode) 
+    int BUTTON_VAL = digitalRead(25);
+    if(BUTTON_VAL == 0 && !InBindingMode) 
     {
       EnterBindingMode();
     }
