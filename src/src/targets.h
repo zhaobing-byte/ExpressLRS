@@ -372,8 +372,9 @@ https://github.com/jaxxzer
 #define GPIO_PIN_OLED_SCK -1
 #define GPIO_PIN_RCSIGNAL_RX 13
 #define GPIO_PIN_RCSIGNAL_TX 13
-#define GPIO_PIN_LED_GREEN 17
-#define GPIO_PIN_LED_RED 16
+#define GPIO_PIN_LED_GREEN_OUTPUT 17
+#define GPIO_PIN_LED_RED_OUTPUT 16
+#define GPIO_PIN_BUTTON 25
 
 #elif defined(TARGET_RX_BETAFPV_2400_V1)
 #define GPIO_PIN_NSS 15

@@ -1,8 +1,16 @@
 #include "button.h"
 
+#ifdef BETAFPV_USER_SETTING
+void ShortPressISR(void);
+void LongPressISR(void);
+void (*button::buttonShortPress)() = &ShortPressISR; // callbacks
+void (*button::buttonLongPress)() = &LongPressISR;  // callbacks
+bool button::buttonReleaseState = true;
+#else
 void inline button::nullCallback(void) {}
 void (*button::buttonShortPress)() = &nullCallback; // callbacks
 void (*button::buttonLongPress)() = &nullCallback;  // callbacks
+#endif
 
 uint32_t button::buttonLastPressed = 0;
 uint32_t button::buttonLastPressedLong = 0;
@@ -53,6 +61,9 @@ void button::sampleButton()
             }
             buttonIsDown = false; //button has been released at some point
             buttonIsDownLong = false;
+            #ifdef BETAFPV_USER_SETTING
+                buttonReleaseState = true;
+            #endif
         }
     }
     else

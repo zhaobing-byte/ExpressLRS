@@ -26,8 +26,11 @@ public:
     static void init(int Pin, bool activeHigh = true);
     static void handle();
 
+    #ifdef BETAFPV_USER_SETTING
+    static bool buttonReleaseState;
+    #endif
     static void inline nullCallback(void);
-
+    
     static void (*buttonShortPress)();
     static void (*buttonLongPress)();
 };

@@ -12,7 +12,6 @@ SX1280Driver Radio;
 #endif
 
 #include "CRSF.h"
-#include "SBUS.h"
 #include "FHSS.h"
 #include "LED.h"
 // #include "debug.h"
@@ -49,6 +48,11 @@ DAC TxDAC;
 button button;
 #endif
 
+#ifdef TARGET_TX_BETAFPV_2400_V1
+#include "SBUS.h"
+SBUS sbus; 
+#endif
+
 #ifdef TARGET_TX_GHOST
 uint8_t LEDfadeDiv;
 uint8_t LEDfade;
@@ -72,7 +76,6 @@ const uint8_t thisCommit[6] = {LATEST_COMMIT};
 hwTimer hwTimer;
 GENERIC_CRC8 ota_crc(ELRS_CRC_POLY);
 CRSF crsf;
-SBUS sbus;
 POWERMGNT POWERMGNT;
 MSP msp;
 ELRS_EEPROM eeprom;
@@ -655,8 +658,10 @@ void setup()
     TxDAC.init();
   #endif
 
-#if defined(USE_BUTTON_BIND)
-  pinMode(25, INPUT_PULLUP);
+#ifdef BETAFPV_USER_SETTING
+  Serial.println("betafpv led init");
+  pinMode(GPIO_PIN_LED_GREEN_OUTPUT, OUTPUT);
+  pinMode(GPIO_PIN_LED_RED_OUTPUT, OUTPUT);
 #endif
 
 #if defined(GPIO_PIN_BUTTON) && (GPIO_PIN_BUTTON != UNDEF_PIN)
@@ -766,15 +771,6 @@ void loop()
     }
   #endif
 
-
-  #if defined(USE_BUTTON_BIND)
-    int BUTTON_VAL = digitalRead(25);
-    if(BUTTON_VAL == 0 && !InBindingMode) 
-    {
-      EnterBindingMode();
-    }
-  #endif
-
   HandleUpdateParameter();
 
   // If there's an outstanding eeprom write, and we've waited long enough for any IRQs to fire...
@@ -820,7 +816,7 @@ void loop()
   #if defined(GPIO_PIN_BUTTON) && (GPIO_PIN_BUTTON != UNDEF_PIN)
     button.handle();
   #endif
-
+  
   if (Serial.available())
   {
     uint8_t c = Serial.read();
@@ -1042,5 +1038,50 @@ extern "C"
 void EXTI2_TSC_IRQHandler()
 {
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+}
+#endif
+
+
+#ifdef BETAFPV_USER_SETTING
+void ShortPressISR()
+{
+    Serial.println("ShortPress");
+    EnterBindingMode();
+    
+  digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+  digitalWrite(GPIO_PIN_LED_RED_OUTPUT,HIGH);
+  Serial.println("betafpv led -high");
+}
+
+void LongPressISR()
+{
+  Serial.println("LongPress");
+
+  if(button.buttonReleaseState == true)
+  {
+    switch(POWERMGNT.currPower())
+    {
+      case PWR_100mW:
+        POWERMGNT.setPower(PWR_250mW);
+        Serial.println("set PWR_250mW");
+        break;
+      case PWR_250mW:
+        POWERMGNT.setPower(PWR_500mW);
+        Serial.println("set PWR_500mW");     
+        break;
+      case PWR_500mW:
+        POWERMGNT.setPower(PWR_100mW);
+        Serial.println("set PWR_100mW");  
+        break;
+      default:
+        POWERMGNT.setPower(PWR_100mW);
+        Serial.println("set PWR_100mW"); 
+        break;
+    }
+    button.buttonReleaseState = false;
+  }
+  Serial.println(POWERMGNT.currPower());
+
+
 }
 #endif
