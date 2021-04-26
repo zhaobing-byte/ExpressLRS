@@ -51,6 +51,11 @@ button button;
 #ifdef TARGET_TX_BETAFPV_2400_V1
 #include "SBUS.h"
 SBUS sbus; 
+uint32_t bindLedFlashInterval = 0;
+bool LED = false;
+uint8_t LEDPulseCounter = 0;
+#define BIND_LED_FLASH_INTERVAL_SHORT 100
+#define BIND_LED_FLASH_INTERVAL_LONG 1000
 #endif
 
 #ifdef TARGET_TX_GHOST
@@ -658,12 +663,6 @@ void setup()
     TxDAC.init();
   #endif
 
-#ifdef BETAFPV_USER_SETTING
-  Serial.println("betafpv led init");
-  pinMode(GPIO_PIN_LED_GREEN_OUTPUT, OUTPUT);
-  pinMode(GPIO_PIN_LED_RED_OUTPUT, OUTPUT);
-#endif
-
 #if defined(GPIO_PIN_BUTTON) && (GPIO_PIN_BUTTON != UNDEF_PIN)
   button.init(GPIO_PIN_BUTTON, true); // r9 tx appears to be active high
 #endif
@@ -736,6 +735,33 @@ void setup()
   ExpressLRS_currAirRate_Modparams->TLMinterval = (expresslrs_tlm_ratio_e)config.GetTlm();
   POWERMGNT.setPower((PowerLevels_e)config.GetPower());
 
+  Serial.println(POWERMGNT.currPower());
+
+  #ifdef BETAFPV_USER_SETTING
+  Serial.println("betafpv led init");
+  pinMode(GPIO_PIN_LED_GREEN_OUTPUT, OUTPUT);
+  pinMode(GPIO_PIN_LED_RED_OUTPUT, OUTPUT);
+  switch(POWERMGNT.currPower())
+  {
+    case PWR_100mW:
+      digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+      digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);      
+      break;
+    case PWR_250mW:
+      digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+      digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);     
+      break;
+    case PWR_500mW:
+      digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH); 
+      digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LOW);      
+      break;
+    default:
+      digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+      digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);   
+      break;
+  }
+  #endif
+
   crsf.Begin();
   hwTimer.init();
   hwTimer.resume();
@@ -769,6 +795,61 @@ void loop()
       HandleWebUpdate();
       return;
     }
+  #endif
+#ifdef BETAFPV_USER_SETTING
+    // Update the LED while in binding mode
+    if (InBindingMode)
+    {
+        if (millis() > bindLedFlashInterval)
+        {
+            if (LEDPulseCounter == 0)
+            {
+                LED = true;
+            }
+            else if (LEDPulseCounter == 4)
+            {
+                LED = false;
+            }
+            else
+            {
+                LED = !LED;
+            }
+
+            if (LEDPulseCounter < 4)
+            {
+                bindLedFlashInterval = millis() + BIND_LED_FLASH_INTERVAL_SHORT;
+            }
+            else
+            {
+                bindLedFlashInterval = millis() + BIND_LED_FLASH_INTERVAL_LONG;
+                LEDPulseCounter = 0;
+            }
+
+
+            switch(POWERMGNT.currPower())
+            {
+              case PWR_100mW:
+                digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LED);
+                digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW); 
+                break;
+              case PWR_250mW:
+                digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LED);
+                digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LED);     
+                break;
+              case PWR_500mW:
+                digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LOW);
+                digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LED);  
+                break;
+              default:
+                POWERMGNT.setPower(PWR_100mW);
+                digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LOW);
+                digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LED);
+                break;
+            }
+
+            LEDPulseCounter++;
+        }
+    }  
   #endif
 
   HandleUpdateParameter();
@@ -982,8 +1063,13 @@ void EnterBindingMode()
   // Lock the RF rate and freq while binding
   SetRFLinkRate(RATE_DEFAULT);
   Radio.SetFrequencyReg(GetInitialFreq());
+  #if defined(TARGET_TX_BETAFPV_2400_V1) || defined(TARGET_TX_BETAFPV_900_V1)
+  POWERMGNT.setPower(PWR_100mW); 
+  digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+  digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW); 
+  #else
   POWERMGNT.setPower(PWR_10mW);
-
+  #endif
   Serial.print("Entered binding mode at freq = ");
   Serial.println(Radio.currFreq);
 }
@@ -1008,6 +1094,11 @@ void ExitBindingMode()
   DeviceAddr = UID[5] & 0b111111;
 
   InBindingMode = false;
+
+  #if defined(TARGET_TX_BETAFPV_2400_V1) || defined(TARGET_TX_BETAFPV_900_V1)
+  digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+  digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW); 
+  #endif
 
   Serial.println("Exiting binding mode");
 }
@@ -1047,34 +1138,38 @@ void ShortPressISR()
 {
     Serial.println("ShortPress");
     EnterBindingMode();
-    
-  digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
-  digitalWrite(GPIO_PIN_LED_RED_OUTPUT,HIGH);
-  Serial.println("betafpv led -high");
 }
 
 void LongPressISR()
 {
   Serial.println("LongPress");
 
-  if(button.buttonReleaseState == true)
+  if(button.buttonReleaseState == true && !InBindingMode)
   {
     switch(POWERMGNT.currPower())
     {
       case PWR_100mW:
         POWERMGNT.setPower(PWR_250mW);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);   
         Serial.println("set PWR_250mW");
         break;
       case PWR_250mW:
         POWERMGNT.setPower(PWR_500mW);
-        Serial.println("set PWR_500mW");     
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LOW);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);   
+        Serial.println("set PWR_500mW");   
         break;
       case PWR_500mW:
         POWERMGNT.setPower(PWR_100mW);
-        Serial.println("set PWR_100mW");  
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);   
+        Serial.println("set PWR_100mW");
         break;
       default:
         POWERMGNT.setPower(PWR_100mW);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);   
         Serial.println("set PWR_100mW"); 
         break;
     }

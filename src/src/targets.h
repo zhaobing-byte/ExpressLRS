@@ -407,6 +407,9 @@ https://github.com/jaxxzer
 #define GPIO_PIN_RCSIGNAL_RX 13
 #define GPIO_PIN_RCSIGNAL_TX 13 // so we don't have to solder the extra resistor, we switch rx/tx using gpio mux
 #define GPIO_PIN_LED -1
+#define GPIO_PIN_LED_GREEN_OUTPUT 17
+#define GPIO_PIN_LED_RED_OUTPUT 16
+#define GPIO_PIN_BUTTON 25
 
 #elif defined(TARGET_RX_BETAFPV_900_V1)
 #define GPIO_PIN_NSS 15
