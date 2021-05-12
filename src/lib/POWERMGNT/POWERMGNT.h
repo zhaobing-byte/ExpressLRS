@@ -65,6 +65,11 @@
 #define DefaultPowerEnum 2
 #endif
 
+#ifdef TARGET_TX_BETAFPV_900_V1
+#define MaxPower 5
+#define DefaultPowerEnum 2
+#endif
+
 typedef enum
 {
     PWR_10mW = 0,

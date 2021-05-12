@@ -48,7 +48,7 @@ DAC TxDAC;
 button button;
 #endif
 
-#ifdef TARGET_TX_BETAFPV_2400_V1
+#if defined(TARGET_TX_BETAFPV_2400_V1)||(TARGET_TX_BETAFPV_900_V1)
 #include "SBUS.h"
 SBUS sbus; 
 uint32_t bindLedFlashInterval = 0;
@@ -735,8 +735,6 @@ void setup()
   ExpressLRS_currAirRate_Modparams->TLMinterval = (expresslrs_tlm_ratio_e)config.GetTlm();
   POWERMGNT.setPower((PowerLevels_e)config.GetPower());
 
-  Serial.println(POWERMGNT.currPower());
-
   #ifdef BETAFPV_USER_SETTING
   Serial.println("betafpv led init");
   pinMode(GPIO_PIN_LED_GREEN_OUTPUT, OUTPUT);
@@ -846,7 +844,6 @@ void loop()
                 digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LED);
                 break;
             }
-
             LEDPulseCounter++;
         }
     }  
@@ -1146,25 +1143,16 @@ void LongPressISR()
 
   if(button.buttonReleaseState == true && !InBindingMode)
   {
-    switch(POWERMGNT.currPower())
+        switch(POWERMGNT.currPower())
     {
       case PWR_100mW:
         POWERMGNT.setPower(PWR_250mW);
-        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
-        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);   
-        Serial.println("set PWR_250mW");
         break;
       case PWR_250mW:
         POWERMGNT.setPower(PWR_500mW);
-        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LOW);
-        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);   
-        Serial.println("set PWR_500mW");   
         break;
       case PWR_500mW:
         POWERMGNT.setPower(PWR_100mW);
-        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
-        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);   
-        Serial.println("set PWR_100mW");
         break;
       default:
         POWERMGNT.setPower(PWR_100mW);
@@ -1176,7 +1164,5 @@ void LongPressISR()
     button.buttonReleaseState = false;
   }
   Serial.println(POWERMGNT.currPower());
-
-
 }
 #endif

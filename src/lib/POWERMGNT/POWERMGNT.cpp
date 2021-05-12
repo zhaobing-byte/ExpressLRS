@@ -237,30 +237,79 @@ PowerLevels_e POWERMGNT::setPower(PowerLevels_e Power)
         Radio.SetOutputPower(3);
         break;
     }
+#elif defined(TARGET_TX_BETAFPV_900_V1)
+    switch (Power)
+    {
+    case PWR_100mW:
+        Radio.SetOutputPower(0b0000);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);
+        Serial.println("set PWR_100mW");
+        break;
+    case PWR_250mW:
+        Radio.SetOutputPower(0b0001);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);
+        Serial.println("set PWR_250mW");
+        break;
+    case PWR_500mW:
+        Radio.SetOutputPower(0b1000);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LOW);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);
+        Serial.println("set PWR_500mW");
+        break;
+    case PWR_1000mW:
+        Radio.SetOutputPower(0b1111);
+        break;
+    case PWR_50mW:
+    default:
+        Radio.SetOutputPower(0b0000);
+        Power = PWR_50mW;
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);
+        break;
+    }
 #elif defined(TARGET_TX_BETAFPV_2400_V1)
     switch (Power)
     {
     case PWR_10mW:
         Radio.SetOutputPower(-15);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);        
         break;
     case PWR_25mW:
         Radio.SetOutputPower(-11);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);        
         break;
     case PWR_50mW:
-        Radio.SetOutputPower(-8);
+        Radio.SetOutputPower(-10);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);        
         break;
     case PWR_100mW:
-        Radio.SetOutputPower(-5);
+        Radio.SetOutputPower(-9);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);
+        Serial.println("set PWR_100mW");
         break;
     case PWR_250mW:
-        Radio.SetOutputPower(-1);
+        Radio.SetOutputPower(-3);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);
+        Serial.println("set PWR_250mW");
         break;
     case PWR_500mW:
         Radio.SetOutputPower(13);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, LOW);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, HIGH);
+        Serial.println("set PWR_500mW");
         break;
     default:
         Power = PWR_50mW;
         Radio.SetOutputPower(-8);
+        digitalWrite(GPIO_PIN_LED_GREEN_OUTPUT, HIGH);
+        digitalWrite(GPIO_PIN_LED_RED_OUTPUT, LOW);    
         break;
     }
 #else
